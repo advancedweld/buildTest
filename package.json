@@ -1,0 +1,11 @@
+{
+  "name": "webpack-fufill",
+  "version": "1.0.0",
+  "description": " 用来实现 webpack 原理以及模块化",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "xiangshangzhi",
+  "license": "ISC"
+}

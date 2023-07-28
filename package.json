@@ -12,6 +12,7 @@
     "@babel/core": "^7.22.9",
     "@babel/parser": "^7.22.7",
     "@babel/preset-env": "^7.22.9",
-    "@babel/traverse": "^7.22.8"
+    "@babel/traverse": "^7.22.8",
+    "koa": "^2.14.2"
   }
 }

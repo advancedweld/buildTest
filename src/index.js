@@ -1,11 +1,20 @@
-import add from './add.js';
-import minus from './minus.js';
+const fs = require('fs');
+const path = require('path');
+const Koa = require('koa');
+const app = new Koa();
+app.use(async (ctx) => {
+  const { url, query } = ctx.request;
+  console.log('url====\n', url);
+  console.log('query====\n', query);
+  if (url === '/') {
+    ctx.type = 'text/html';
 
-function myFn() {
-  console.log('@@@@@@@@@@@@@@myFn===', 123);
-}
-const sum = add(1, 2);
-const division = minus(2, 1);
-
-console.log('@@@@@@@@@@@@@@add===', sum);
-console.log('@@@@@@@@@@@@@@minus===', division);
+    const filePath = path.join(__dirname, 'index.html');
+    const content = fs.readFileSync(filePath, 'utf-8');
+    console.log('content====\n', content);
+    ctx.body = content;
+  }
+});
+app.listen(3001, () => {
+  console.log('server is running 3001');
+});

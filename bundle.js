@@ -5,6 +5,8 @@ const fs = require('fs');
 const traverse = require('@babel/traverse').default;
 const babel = require('@babel/core');
 
+const generate = require('@babel/generator').default;
+
 const getModuleInfo = (file) => {
   const body = fs.readFileSync(file, 'utf-8');
   // console.log('@@@@@@@@@@body====\n', body);
@@ -22,13 +24,22 @@ const getModuleInfo = (file) => {
     /* ImportDeclaration方法代表的是对type类型为ImportDeclaration的节点的处理 */
     ImportDeclaration({ node }) {
       const dirname = path.dirname(file);
-      // console.log('@@@dirname==============', dirname); // ./src
+      console.log('@@@dirname==============', dirname); // ./src
       const abspath = './' + path.join(dirname, node.source.value);
       deps[node.source.value] = abspath;
     },
-  });
-  // console.log('@@@deps==============\n', deps);
 
+    /* 处理ast里的函数声明 */
+    // FunctionDeclaration: function (path) {
+    //   /* 改变函数名 */
+    //   path.node.id.name = 'x';
+    //   console.log('@@@FunctionDeclaration===', path.node);
+    // },
+  });
+  console.log('@@@deps==============\n', deps);
+
+  const result = generate(ast);
+  console.log('@@@result==============\n', result);
   /* 转换代码, es6转es5 */
   const { code } = babel.transformFromAst(ast, null, {
     presets: ['@babel/preset-env'],
@@ -40,7 +51,7 @@ const getModuleInfo = (file) => {
   return moduleInfo;
 };
 
-// getModuleInfo('./src/index.js');
+getModuleInfo('./src/index.js');
 // getModuleInfo('./src/indexTest.js');
 /* 递归获取依赖 */
 const parseModules = (file) => {
@@ -91,13 +102,14 @@ const bundle = (file) => {
 };
 
 /* 拿到最终输出 */
-const content = bundle('./src/index.js');
+// const content = bundle('./src/index.js');
 
-console.log('@@@@@@@@@@content=====\n', content);
+// console.log('@@@@@@@@@@content=====\n', content);
 
 //写入到我们的dist目录下
-fs.mkdirSync('./dist');
-fs.writeFileSync('./dist/bundle.js', content);
+!!fs.existsSync('./dist') && fs.rmdirSync('./dist');
+// fs.mkdirSync('./dist');
+// fs.writeFileSync('./dist/bundle.js', content);
 
 /* 异步读取文件 */
 // const asyncGetModuleInfo = (file) => {

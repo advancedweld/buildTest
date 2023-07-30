@@ -37,8 +37,7 @@ app.use(async (ctx) => {
     /* 改写import并返回 */
     ctx.body = rewriteImport(content);
   }
-
-  // 第三方库支持  vue => node_modules/vue
+  // 第三方库支持  vue => node_modules/vue 也就是既不是绝对路径也不是相对路径
   else if (url.startsWith(PREFIX)) {
     // /@node_modules/vue 的es入口
     // 读取package.json文件 module字段
@@ -46,41 +45,29 @@ app.use(async (ctx) => {
     console.log('@@@prefix:', prefix);
 
     let filePath;
-    /* 判断是否存在package.json */
+    /* 不存在package.json,直接读取.js文件 */
     if (!fs.existsSync(prefix + '/package.json')) {
       filePath = `${prefix}.js`;
     } else {
       //node_modules\vue\package.json
       const modulePath = path.join(prefix, '/package.json');
-
       /* packaje.json中module字段指示了es模块入口 */
       const module = require(modulePath).module || require(modulePath).main;
-
       console.log('@@@module:', module);
-
       filePath = path.resolve(prefix, module);
     }
 
-    console.log('@@@filePath:', filePath);
+    // console.log('@@@filePath:', filePath);
     const content = fs.readFileSync(filePath, 'utf-8');
     ctx.type = 'application/javascript';
     // ctx.body = content;
     ctx.body = rewriteImport(content);
   }
 });
+
 app.listen(3001, () => {
   console.log('server is running 3001');
 });
-
-function replacer(match, s1) {
-  // console.log('@@@@match:', match);
-  /* is not a relative path ,like './module' */
-  if (!s1.startsWith('.')) {
-    const apiPath = `${PREFIX}/${s1}`;
-    return `from '${apiPath}'`;
-  }
-  return match;
-}
 
 /**
  * @description: 改写函数，将第三方库改写成绝对路径引引用
@@ -90,4 +77,14 @@ function replacer(match, s1) {
 function rewriteImport(path) {
   /* 正则表达式注意别写错了，空格要小心 */
   return path.replace(/from ['"]([^'"]+)['"]/g, replacer);
+}
+
+function replacer(match, s1) {
+  // console.log('@@@@match:', match);
+  /* is not a relative path ,like './module' */
+  if (!s1.startsWith('.')) {
+    const apiPath = `${PREFIX}/${s1}`;
+    return `from '${apiPath}'`;
+  }
+  return match;
 }

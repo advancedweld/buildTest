@@ -5,7 +5,7 @@
  * @Description:
  */
 import { createApp, h } from 'vue';
-
+import './index.css';
 import App from './App.vue';
 // const App = {
 //   render() {

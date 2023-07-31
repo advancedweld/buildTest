@@ -30,6 +30,25 @@ app.use(async (ctx) => {
   }
 
   // css文件支持
+  else if (url.endsWith('.css')) {
+    // stratages.returnCss(url, ctx);
+
+    const filePath = path.resolve(__dirname, url.slice(5));
+    const file = fs.readFileSync(filePath, 'utf-8');
+    const str = JSON.stringify(file);
+    const _file = str.replace(/\\r\\n/g, '');
+
+    const content = `
+    const css = ${_file};
+    let link = document.createElement('style');
+    link.setAttribute('type', 'text/css');
+    document.head.appendChild(link);
+    link.innerHTML = css;
+    export default css;
+    `;
+    ctx.type = 'application/javascript';
+    ctx.body = content;
+  }
 });
 
 app.listen(3001, () => {
@@ -137,5 +156,10 @@ const stratages = {
       ctx.type = 'application/javascript';
       ctx.body = rewriteImport(render);
     }
+  },
+
+  returnCss: function (url, ctx) {
+    const content = '';
+    const css = 'lll';
   },
 };

@@ -67,18 +67,32 @@ app.use(async (ctx) => {
 
   // .vue文件 ==> .js文件
   else if (url.includes('.vue')) {
-    const filePath = path.resolve(__dirname, url.slice(5));
+    //  *.vue?type=template
+    const filePath = path.resolve(__dirname, url.split('?')[0].slice(5));
     console.log('@@@filePath:', filePath);
 
     const rowContent = fs.readFileSync(filePath, 'utf-8');
-    // console.log('@@@rowContent:', rowContent);
-    const content = compilerSfc.compileTemplate({
-      source: rowContent,
-      id: 'test',
-    });
-    console.log('@@@content:', content);
-    ctx.type = 'application/javascript';
-    ctx.body = content.code;
+
+    if (!query.type) {
+      // 第一步， .vue文件 => template.script (compiler-sfc)
+      const { descriptor } = compilerSfc.parse(rowContent);
+      if (!query.type) {
+        ctx.type = 'application/javascript';
+        ctx.body = `
+        ${rewriteImport(descriptor.script.content.replace('export default ', 'const __script = '))}
+        import { render as __render } from "${url}?type=template"
+        __script.render = __render
+        export default __script
+        `;
+      }
+    } else {
+      // 第二步， template模板 => template.render  (compiler-dom)
+      const { descriptor } = compilerSfc.parse(rowContent);
+      const template = descriptor.template;
+      const render = compilerDom.compile(template.content, { mode: 'module' }).code;
+      ctx.type = 'application/javascript';
+      ctx.body = rewriteImport(render);
+    }
   }
 });
 

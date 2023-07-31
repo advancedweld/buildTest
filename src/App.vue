@@ -6,7 +6,15 @@
   </h2>
 </template>
 
-<script setup>
+<script>
 import { ref } from "vue";
-const count = ref(0);
+export default {
+  name: "App",
+  setup() {
+    const count = ref(0);
+    return {
+      count,
+    };
+  },
+};
 </script>

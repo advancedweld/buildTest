@@ -4,18 +4,20 @@ const fs = require('fs');
 const path = require('path');
 const Koa = require('koa');
 const app = new Koa();
+// console.log('@@@@@__dirname: ', __dirname); //  D:\github\buildTest\src
 
+/* 用来解析.vue单文件组件 */
+const compilerSfc = require('@vue/compiler-sfc');
+const compilerDom = require('@vue/compiler-dom');
 /* esmodule中 __dirname未定义，不能直接使用 */
 // const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(async (ctx) => {
   const { url, query } = ctx.request;
-  console.log('url:', url);
-  console.log('query====\n', query);
-  // console.log('@@@@@__dirname: ', __dirname); //  D:\github\buildTest\src
-  //  index.html
+
+  //  => index.html
   if (url === '/') {
     ctx.type = 'text/html';
-    const filePath = path.join(__dirname, 'index.html');
+    const filePath = path.resolve(__dirname, 'index.html');
     let content = fs.readFileSync(filePath, 'utf-8');
 
     /* 入口文件加入环境变量 否则会报错‘process is not defined’ */
@@ -50,7 +52,7 @@ app.use(async (ctx) => {
       filePath = `${prefix}.js`;
     } else {
       //node_modules\vue\package.json
-      const modulePath = path.join(prefix, '/package.json');
+      const modulePath = path.resolve(prefix, 'package.json');
       /* packaje.json中module字段指示了es模块入口 */
       const module = require(modulePath).module || require(modulePath).main;
       console.log('@@@module:', module);
@@ -60,8 +62,23 @@ app.use(async (ctx) => {
     // console.log('@@@filePath:', filePath);
     const content = fs.readFileSync(filePath, 'utf-8');
     ctx.type = 'application/javascript';
-    // ctx.body = content;
     ctx.body = rewriteImport(content);
+  }
+
+  // .vue文件 ==> .js文件
+  else if (url.includes('.vue')) {
+    const filePath = path.resolve(__dirname, url.slice(5));
+    console.log('@@@filePath:', filePath);
+
+    const rowContent = fs.readFileSync(filePath, 'utf-8');
+    // console.log('@@@rowContent:', rowContent);
+    const content = compilerSfc.compileTemplate({
+      source: rowContent,
+      id: 'test',
+    });
+    console.log('@@@content:', content);
+    ctx.type = 'application/javascript';
+    ctx.body = content.code;
   }
 });
 

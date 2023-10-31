@@ -71,6 +71,9 @@ const parseModules = (file) => {
   // console.log('@@@temp====\n', temp);
 
   /* 路径为key，{code，deps}为值的形式存储。因此，我们创建一个新的对象depsGraph。 */
+  /**
+   * ！注意：这里没有解决循环引用问题
+   */
   const depsGraph = {}; //新增代码
   temp.forEach((moduleInfo) => {
     depsGraph[moduleInfo.file] = {
@@ -102,14 +105,14 @@ const bundle = (file) => {
 };
 
 /* 拿到最终输出 */
-// const content = bundle('./src/index.js');
+const content = bundle('./src/index.js');
 
 // console.log('@@@@@@@@@@content=====\n', content);
 
 //写入到我们的dist目录下
 !!fs.existsSync('./dist') && fs.rmdirSync('./dist');
-// fs.mkdirSync('./dist');
-// fs.writeFileSync('./dist/bundle.js', content);
+fs.mkdirSync('./dist');
+fs.writeFileSync('./dist/bundle.js', content);
 
 /* 异步读取文件 */
 // const asyncGetModuleInfo = (file) => {

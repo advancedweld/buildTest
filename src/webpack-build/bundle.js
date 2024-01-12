@@ -9,7 +9,7 @@ const generate = require('@babel/generator').default;
 
 const getModuleInfo = (file) => {
   const body = fs.readFileSync(file, 'utf-8');
-  // console.log('@@@@@@@@@@body====\n', body);
+  console.log('@@@@@@@@@@body====\n', body);
 
   // 解析成ast
   const ast = parser.parse(body, {
@@ -39,7 +39,7 @@ const getModuleInfo = (file) => {
   console.log('@@@deps==============\n', deps);
 
   const result = generate(ast);
-  console.log('@@@result==============\n', result);
+  // console.log('@@@result==============\n', result);
   /* 转换代码, es6转es5 */
   const { code } = babel.transformFromAst(ast, null, {
     presets: ['@babel/preset-env'],

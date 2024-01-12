@@ -1,5 +1,5 @@
-import add from './webpack-build/add.js';
-import minus from './webpack-build/minus.js';
+import add from './add.js';
+import minus from './minus.js';
 
 function myFn() {
   console.log('@@@@@@@@@@@@@@myFn===', 123);

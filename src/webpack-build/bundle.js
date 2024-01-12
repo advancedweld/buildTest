@@ -4,12 +4,18 @@ const path = require('path');
 const fs = require('fs');
 const traverse = require('@babel/traverse').default;
 const babel = require('@babel/core');
-
 const generate = require('@babel/generator').default;
+const crypto = require('crypto');
 
 const getModuleInfo = (file) => {
-  const body = fs.readFileSync(file, 'utf-8');
-  console.log('@@@@@@@@@@body====\n', body);
+  const filepath = path.join(__dirname, file);
+  // console.log('🚀 ~ getModuleInfo ~ filepath:', filepath);
+
+  if (!fs.existsSync(filepath)) {
+    throw new Error('文件不存在');
+  }
+  const body = fs.readFileSync(filepath, 'utf-8');
+  // console.log('@@@@@@@@@@body====\n', body);
 
   // 解析成ast
   const ast = parser.parse(body, {
@@ -51,8 +57,6 @@ const getModuleInfo = (file) => {
   return moduleInfo;
 };
 
-getModuleInfo('./src/index.js');
-// getModuleInfo('./src/indexTest.js');
 /* 递归获取依赖 */
 const parseModules = (file) => {
   const entry = getModuleInfo(file);
@@ -84,7 +88,6 @@ const parseModules = (file) => {
   // console.log('@@@@@@@@depsGraph==========\n', depsGraph);
   return depsGraph;
 };
-// parseModules('./src/index.js');
 
 /* 实现require和export关键字 生成代码 */
 const bundle = (file) => {
@@ -105,14 +108,23 @@ const bundle = (file) => {
 };
 
 /* 拿到最终输出 */
-const content = bundle('./src/index.js');
-
-// console.log('@@@@@@@@@@content=====\n', content);
+const content = bundle('./sum.js');
 
 //写入到我们的dist目录下
-!!fs.existsSync('./dist') && fs.rmdirSync('./dist');
-fs.mkdirSync('./dist');
-fs.writeFileSync('./dist/bundle.js', content);
+const distPath = path.join(__dirname, './dist');
+
+if (fs.existsSync(distPath)) {
+  // 递归地删除dist目录及其内容
+  fs.rmSync(distPath, { recursive: true, force: true });
+}
+
+// 计算当前内容的哈希值
+const newHash = crypto.createHash('md5').update(content).digest('hex');
+const hashedFilename = `bundle.${newHash}.js`;
+
+// 写入新内容
+fs.mkdirSync(distPath);
+fs.writeFileSync(path.join(distPath, hashedFilename), content);
 
 /* 异步读取文件 */
 // const asyncGetModuleInfo = (file) => {

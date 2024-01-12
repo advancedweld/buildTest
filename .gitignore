@@ -14,6 +14,7 @@
 
 /build
 /dist
+/src/webpack-build/dist
 
 # misc
 

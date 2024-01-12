@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style>
+      .container {
+
+        height: 800px;
+        display: flex;
+      }
+      #reactRoot{
+        border: 1px solid red;
+        width: 50%;
+        min-height: 500px;
+      }
+      #vueRoot{
+        border: 1px solid red;
+        flex: 1;
+        margin-left: 20px;
+        min-height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>mini vite</h1>
+    <!-- 浏览器也支持es6模块加载 -->
+    <script type="module" src="/src/mainVue.js"></script>
+    <script type="module" src="/src/mainReact.js"></script>
+    <!-- <script src="./dist/bundle.js"></script> -->
+    <div class="container">
+      <div id="reactRoot"></div>
+      <div id="vueRoot"></div>
+    </div>
+  </body>
+</html>

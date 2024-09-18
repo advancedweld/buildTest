@@ -8,6 +8,8 @@ const generate = require('@babel/generator').default;
 const crypto = require('crypto');
 
 const getModuleInfo = (file) => {
+  console.log('🚀 ~ getModuleInfo ~ file:', file);
+
   const filepath = path.join(__dirname, file);
   // console.log('🚀 ~ getModuleInfo ~ filepath:', filepath);
 
@@ -29,10 +31,26 @@ const getModuleInfo = (file) => {
   traverse(ast, {
     /* ImportDeclaration方法代表的是对type类型为ImportDeclaration的节点的处理 */
     ImportDeclaration({ node }) {
+      // 当前文件所在的目录路径
       const dirname = path.dirname(file);
-      console.log('@@@dirname==============', dirname); // ./src
-      const abspath = './' + path.join(dirname, node.source.value);
-      deps[node.source.value] = abspath;
+
+      console.log('@@@dirname: ', dirname); // .
+
+      const importPath = node.source.value;
+
+      // 判断 importPath 是否是相对路径或绝对路径
+      if (path.isAbsolute(importPath)) {
+        // 绝对路径，直接使用它
+        deps[importPath] = importPath;
+      } else if (importPath.startsWith('./') || importPath.startsWith('../')) {
+        // 相对路径，拼接为完整路径
+        const abspath = path.join(dirname, importPath);
+        deps[importPath] = abspath;
+      } else {
+        // 处理第三方库（例如 'react' 或 'lodash'）
+        // 标记为外部库，不进行路径解析
+        deps[importPath] = 'external';
+      }
     },
 
     /* 处理ast里的函数声明 */
@@ -67,7 +85,11 @@ const parseModules = (file) => {
       /* 遍历所有依赖，递归获取到依赖模块数据 */
       for (const key in deps) {
         if (deps.hasOwnProperty(key)) {
-          temp.push(getModuleInfo(deps[key]));
+          const depPath = deps[key];
+          // 如果是外部库，直接跳过
+          if (depPath !== 'external') {
+            temp.push(getModuleInfo(deps[key]));
+          }
         }
       }
     }

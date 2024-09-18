@@ -107,6 +107,8 @@ const stratages = {
     // /@node_modules/vue 的es入口
     // 读取package.json文件 module字段
     const prefix = path.resolve(__dirname.replace('src', ''), url.replace(PREFIX, 'node_modules'));
+    console.log('🚀 ~ __dirname:', __dirname);
+
     console.log('@@@prefix:', prefix);
 
     let filePath;

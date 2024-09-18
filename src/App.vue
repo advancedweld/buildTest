@@ -1,5 +1,5 @@
 <template>
-  <h1>hello, xiang</h1>
+  <h1>hello, vue</h1>
   <h2>
     <span>count is {{ count }}</span>
     <button @click="count++">+1</button>

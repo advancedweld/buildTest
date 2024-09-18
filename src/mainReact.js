@@ -12,3 +12,20 @@ function App() {
 
 const root = reactClient.createRoot(document.querySelector('#reactRoot')); // createRoot(container!) if you use TypeScript
 root.render(React.createElement(App));
+
+// 生成指定个数的斐波那契数列
+function* generateFib(COUNT) {
+  let count = 0;
+  let a = 1,
+    b = 1;
+  while (count < COUNT) {
+    const sum = a + b;
+    yield sum;
+    a = b;
+    b = sum;
+    count++;
+  }
+}
+
+const fib20 = generateFib(20);
+console.log('@@@', [...fib20]);
